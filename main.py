@@ -80,7 +80,17 @@ if __name__ == '__main__':
                 gv.task_step = 2
                 i = 1
             # st.p_ = 3
-
+        elif gv.task_step == 3:
+            zz = 0
+            while True:
+                mg.TX_append(gv.head_stage)
+                print("날이 아닌가..", zz)
+                if mg.get_sdown():
+                    zz += 1
+                    print('{} 단계 숙이기  완료'.format(zz))
+                if mg.get_sdown_com():
+                    zz = 0
+                    print("전체 숙이기 완료")
         # elif gv.task_step == 2:
         #     gv.task_step = int(input("현재 테스크 2, 다음 테스크 입력바람"))
         # elif gv.task_step == 3:

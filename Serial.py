@@ -108,11 +108,44 @@ class Message:
             return True
         return False
 
+    # 머리 숙인 신호 왔는지 체크
     def get_down(self):
         self.release()
         # print("self.gv.RX: ", self.gv.RX)
         if 38 in self.gv.RX:
             self.gv.RX.remove(38)
+            return True
+        return False
+
+    # 여러 단계별 숙이기에서 한 단계 숙이기 완료했는지 체크
+    def get_head1(self):
+        self.release()
+        if 40 in self.gv.RX:
+            self.gv.RX.remove(40)
+            return True
+        return False
+
+    # 여러 단계별 숙이기에서 한 단계 숙이기 완료했는지 체크
+    def get_head2(self):
+        self.release()
+        if 41 in self.gv.RX:
+            self.gv.RX.remove(41)
+            return True
+        return False
+
+    # 여러 단계별 숙이기에서 한 단계 숙이기 완료했는지 체크
+    def get_head3(self):
+        self.release()
+        if 42 in self.gv.RX:
+            self.gv.RX.remove(42)
+            return True
+        return False
+
+    # 여러 단계별 숙이기에서 한 단계 숙이기 완료했는지 체크
+    def get_head4(self):
+        self.release()
+        if 43 in self.gv.RX:
+            self.gv.RX.remove(43)
             return True
         return False
 

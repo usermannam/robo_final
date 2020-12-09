@@ -28,7 +28,7 @@ class Global_var:
         self.bottom_range = 80  # 선 위치 허용 범위
 
         # 3. 라인 탐색 --> 상황 단계에 따라서
-        self.step = 1
+        self.step = 3
 
         # 제어 신호들 --- v2
         self.Forward = 33  # 앞으로 이동
@@ -38,7 +38,13 @@ class Global_var:
         self.Left_onturn = 37  # 제자리 왼쪽 회전
         self.down_head = 38  # 머리 최대로 숙이기
         self.up_head = 39  # 머리 초기 상태
-        self.stop = 40  # 정지 신호
+        self.head1 = 40  # 머리 1단계 숙이기
+        self.head2 = 41  # 머리 2단계 숙이기
+        self.head3 = 42  # 머리 3단계 숙이기
+        self.head4 = 43  # 머리 4단계 숙이기
+        self.head_count = 1 # 머리 숙이기 단계 진행도
+        self.phead_count = 1 # 머리 숙이기 단계 진행도
+
 
         # 화면 해상도
         self.size_y = 320
@@ -52,7 +58,9 @@ class Global_var:
         # True면 배경이 선보다 밝은 거
         # False면 선이 배경보다 밝은 거
         self.thresh_flag = True
-        self.thresh = 100   # 임계값
+        self.thresh = 100   # S 임계값
+        self.thresh_d = 15   # H_down
+        self.thresh_u = 30   # H_UP
 
         # 산포도 기준 값
         self.max = 0.98
@@ -71,12 +79,16 @@ class Global_var:
         # 화면 기준 값
         # self.h_c = self.size_y // 2
         self.h_c = (231 - 110) // 2     # 가로 중간값
-        self.v_c = (165 - 110) // 2     # 세로 중간값
+        self.v_c = (165 - 110) // 2    # 세로 중간값
 
         # 탐색 간격
         self.it_ = 10
+
         # 오차 수용도
         self.e_ = 20 # 그래프 평평하게 하려고
         self.e_v = 20 # 그래프 평평하게 하려고
         self.graph_h = 10 # 가로 벗어나는 정도
         self.graph_v = 0.02 # 세로 벗어나는 정도
+        self.p_group = 20 # 포인트 그룹화 정도
+        self.s_group = 30 # 기울기 그룹화 정도
+        self.sb = 20 # 교차점 기울기 기준
