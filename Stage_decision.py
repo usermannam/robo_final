@@ -75,60 +75,6 @@ class Stage:
                         print('그래프 오른쪽')
                     else:
                         self.right_turn()
-                # if bottom[1] is not None and top[1] is not None:
-                #     # bottom[1] = bottom[1] - (top[1] - bottom[1])
-                #     # 하단 위치 맞는지
-                #     if bottom[1] - self.gv.e_ <= self.gv.h_c and self.gv.h_c <= bottom[1] + self.gv.e_:
-                #         # print("위아래")
-                #         dy = (top[0] - bottom[0])
-                #         dx = (top[1] - bottom[1])
-                #         angle = 90
-                #         if dx != 0:
-                #             angle = math.atan(dy / dx) * (180.0 / math.pi)
-                #
-                #         if angle < 0:
-                #             angle += 180
-                #         angle -= 90
-                #         # print("re_angle : ", angle)
-                #         # print("angle: ",angle)
-                #         if -20 <= angle <= 20:
-                #             # print('앞으로')
-                #             self.forward()
-                #         elif angle > 0:
-                #             # print('왼쪽')
-                #             self.left_turn()
-                #         else:
-                #             # print('오른쪽')
-                #             self.right_turn()
-                #
-                #     # 하단 위치 안 맞으면
-                #     else:
-                #         if bottom[1] < self.gv.h_c:
-                #             if bottom[1] <= self.gv.h_c and self.gv.h_c <= top[1]:
-                #                 # print('하단 앞으로')
-                #                 self.forward()
-                #             else:
-                #                 # print('하단 왼쪽')
-                #                 self.left_turn()
-                #
-                #         else:
-                #             if top[1] <= self.gv.h_c and self.gv.h_c <= bottom[1]:
-                #                 # print('하단 앞으로')
-                #                 self.forward()
-                #             else:
-                #                 # print('하단 오른쪽')
-                #                 self.right_turn()
-                # else:
-                #     # print("그래프")
-                #     if w_ - self.gv.e_ <= self.gv.h_c and self.gv.h_c <= w_ + self.gv.e_:
-                #         # print('그래프 앞으로')
-                #         self.forward()
-                #     elif w_ <= self.gv.h_c:
-                #         # print('그래프 왼쪽')
-                #         self.left_turn()
-                #     else:
-                #         # print('그래프 오른쪽')
-                #         self.right_turn()
 
         # 턴
         elif self.gv.step == 2:
@@ -155,9 +101,29 @@ class Stage:
                 else:
                     self.right_turn()
                     pass
-    
+
+    # 라인 복귀 함수 (중간 부분쯤에서 직선 따라가기)
+    def return_line2(self, a0, img):
+        h, w = img.shape
+        w = w//2
+        if a0 - self.gv.e_ <= w and w <= a0 + self.gv.e_:
+            if self.deflag:
+                print('그래프 앞으로')
+            else:
+                self.forward()
+        elif a0 <= w:
+            if self.deflag:
+                print('그래프 왼쪽')
+            else:
+                self.left_turn()
+        else:
+            if self.deflag:
+                print('그래프 오른쪽')
+            else:
+                self.right_turn()
+
     # 라인 복귀 함수
-    def return_line(self, cx, cy, h, w):
+    def return_line(self, cx, cy, h, w, head_check=False):
         f = True
         dy = (cy - h)
         dx = (cx - w//2)
@@ -172,16 +138,17 @@ class Stage:
             self.head_control()
             f = False
 
-        if f:
-            if -20 <= angle <= 20:
-                # print('앞으로')
-                self.forward()
-            elif angle < 0:
-                # print('왼쪽')
-                self.left_turn()
-            else:
-                # print('오른쪽')
-                self.right_turn()
+        if not head_check:
+            if f:
+                if -20 <= angle <= 20:
+                    # print('앞으로')
+                    self.forward()
+                elif angle < 0:
+                    # print('왼쪽')
+                    self.left_turn()
+                else:
+                    # print('오른쪽')
+                    self.right_turn()
         
 
     def head_control(self):
@@ -214,7 +181,7 @@ class Stage:
                 self.head4()
                 if self.mg.get_head4():
                     break
-            self.gv.head_count = 0
+            self.gv.head_count = 5
             print("4 Stage")
             print("Mission Complete!")
 

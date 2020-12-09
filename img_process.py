@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 import cv2
-import math
+import math, time
 import matplotlib.pyplot as plt
 
 class Img:
@@ -55,9 +55,6 @@ class Img:
                     kernel = np.ones((3, 3), np.int8)
                     gray = cv2.erode(gray, kernel, iterations=1)
                     gray = cv2.dilate(gray, kernel, iterations=2)
-                    # gray = gray[:]
-                    if self.gv.head_count == 0:
-                        gray = gray[110:165, 110:231]
 
                     height, width = gray.shape
                     cx, cy, left_line, right_line = self.hough_line(gray)
@@ -71,18 +68,27 @@ class Img:
                                 self.st.return_line(cx, cy, height-1, width)
                                 self.head_term = 0
 
-                        # elif self.gv.head_count == 3:
-                        #     l_img = self.getline_img(left_line, right_line, gray)
+                        elif self.gv.head_count >= 3:
+                            self.st.return_line(cx, cy, height - 1, width, head_check=True)
 
-
-                        elif self.gv.head_count == 0:
-                            self.st.forward()
+                            l_img = self.getline_img(left_line, right_line, gray)
+                            a0, a1 = self.sum_pixel(l_img, max_flag=True)
+                            self.st.return_line2(a0, l_img)
 
                         else:
                             self.st.return_line(cx, cy, height - 1, width)
-                    elif self.gv.head_count == 0:
+
+                    elif self.gv.head_count == 5:
                         print("REAL_COMPLETE!!")
-                        self.st.down_head()
+                        gray = gray[110:165, 110:231]
+                        a0, a1 = self.sum_pixel(gray, max_flag=True)
+                        a0_check, a1_check = self.sum_pixel(gray)
+                        if a0_check is not None:
+                            if a0_check - self.gv.e_ <= self.gv.h_c and self.gv.h_c <= a0_check + self.gv.e_:
+                                self.gv.step = 1
+                                continue
+                        if a0 is not None:
+                            self.st.return_line2(a0, gray)
 
                     cv2.imshow('df', gray)
                     k = cv2.waitKey(1)
@@ -127,14 +133,15 @@ class Img:
                 print("error")
                 break
 
-    def sum_pixel(self, img):
+    def sum_pixel(self, img, max_flag=False):
         a0 = np.sum(img, axis=0)    # 가로
         a1 = np.sum(img, axis=1)    # 세로
 
-        a0 = np.where(a0 > 0)[0]
+        if max_flag:
+            a0 = np.where(a0 >= np.max(a0))[0]
+        else:
+            a0 = np.where(a0 > 0)[0]
         a1 = np.where(a1 > 0)[0]
-        # a0 = np.where(a0 >= np.max(a0))[0]
-        # a1 = np.where(a1 >= np.max(a1))[0]
 
         a0 = None if len(a0) == 0 else a0[len(a0) // 2]
         a1 = None if len(a1) == 0 else a1[len(a1) // 2]
@@ -146,9 +153,9 @@ class Img:
         line_img = np.copy(img)
         line_img[:, :] = 0
         if self.gv.L_R_flag:
-            cv2.line(line_img, (left_line[0], left_line[1]), (left_line[2], left_line[3]), 200, 3)
+            cv2.line(line_img, (left_line[0], left_line[1]), (left_line[2], left_line[3]), 255, 3)
         else:
-            cv2.line(line_img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), 200, 3)
+            cv2.line(line_img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), 255, 3)
 
         return line_img
 
@@ -231,14 +238,14 @@ class Img:
                             else:
                                 cx_list.append(cx)
                                 cy_list.append(cy)
-                                line1_list.append(lines[i1][0])
-                                line2_list.append(lines[i2][0])
+                                line1_list.append((lines[i1][0], p1))
+                                line2_list.append((lines[i2][0], p2))
                                 coner_flag = True
 
             if coner_flag:
                 if len(cx_list) > 1:
                     min_y, index = cy_list[0], 0
-                    for i, y in cy_list:
+                    for i, y in enumerate(cy_list):
                         if min_y < y:
                             min_y = y
                             index = i
@@ -258,12 +265,12 @@ class Img:
 
     # 왼쪽선 오른쪽선 구분
     def r_l_line(self, l1, l2):
-        l1_c = (l1[0] + l1[2])//2
-        l2_c = (l2[0] + l2[2])//2
+        l1_c = (l1[0][0] + l1[0][2])//2
+        l2_c = (l2[0][0] + l2[0][2])//2
 
-        left_line, right_line = l1, l2
+        left_line, right_line = l1[1], l2[1]
         if l1_c > l2_c:
-            left_line, right_line = l2, l1
+            left_line, right_line = l2[1], l1[1]
 
         return left_line, right_line
 
