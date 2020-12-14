@@ -1,9 +1,6 @@
-import random
-
 import numpy as np
 import cv2
-import math, time
-import matplotlib.pyplot as plt
+import math
 
 class Img:
     def __init__(self, gv, stage, cap):
@@ -14,20 +11,9 @@ class Img:
         self.size_y = self.gv.size_y
         self.init_ = True
         self.head_term = 0
-    def nothing(self, x):
-        pass
-
-    # 마우스 이벤트 콜백함수 정의
-    def mouse_callback(self, event, x, y, flags, param):
-        print("마우스 이벤트 발생, x:", x, " y:", y)  # 이벤트 발생한 마우스 위치 출력
 
     # 이미지 전처리
     def img_process(self):
-        cv2.namedWindow('threshold')
-        cv2.createTrackbar('H', 'threshold', 0, 255, self.nothing)
-        cv2.createTrackbar('S', 'threshold', 0, 255, self.nothing)
-        cv2.createTrackbar('V', 'threshold', 0, 255, self.nothing)
-        cv2.setMouseCallback('threshold', self.mouse_callback)
         # 영상 읽기
         while True:
             # 넘어짐 신호 있으면 아무것도 수행 X
@@ -35,9 +21,6 @@ class Img:
                 continue
             ret, frame = self.cap.read()
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # HSV로 변환
-            h, v, c = frame.shape
-            h = int(h * self.gv.roi)  # 발 안보이게 하려고 하단에 짤랐음
-            # frame = frame[h-self.gv.m_:h]  # 발 안보이게 하려고 하단에 짤랐음
 
             # 이미지 읽기
             if ret:
@@ -50,7 +33,8 @@ class Img:
                 gray[gray >= self.gv.thresh] = 255
                 gray[gray < self.gv.thresh] = 0
                 gray = hue & gray
-
+                
+                # 라인복귀
                 if self.gv.step == 3:
                     kernel = np.ones((3, 3), np.int8)
                     gray = cv2.erode(gray, kernel, iterations=1)
@@ -58,9 +42,8 @@ class Img:
 
                     height, width = gray.shape
                     cx, cy, left_line, right_line = self.hough_line(gray)
-                    if cx is not None:
-                        cv2.circle(gray, (cx, cy), 20, 200, 5)
 
+                    if cx is not None:
                         if self.gv.head_count != self.gv.phead_count:
                             self.head_term = self.head_term + 1
                             if self.head_term >= 10:
@@ -78,9 +61,14 @@ class Img:
                         else:
                             self.st.return_line(cx, cy, height - 1, width)
 
+                    elif self.gv.head_count == 1 or self.gv.head_count == 2:
+                        if self.gv.L_R_flag:
+                            self.st.left_turn()
+                        else:
+                            self.st.right_turn()
+
                     elif self.gv.head_count == 5:
-                        print("REAL_COMPLETE!!")
-                        gray = gray[110:165, 110:231]
+                        gray = gray[self.gv.y1:self.gv.y2, self.gv.x1:self.gv.x2]
                         a0, a1 = self.sum_pixel(gray, max_flag=True)
                         a0_check, a1_check = self.sum_pixel(gray)
                         if a0_check is not None:
@@ -89,18 +77,12 @@ class Img:
                                 continue
                         if a0 is not None:
                             self.st.return_line2(a0, gray)
-
-                    cv2.imshow('df', gray)
-                    k = cv2.waitKey(1)
-                    # esc 키 종료
-                    if k == 27:
-                        break
                     continue
 
                 kernel = np.ones((3, 3), np.int8)
                 gray = cv2.erode(gray, kernel, iterations=2)
                 gray = cv2.dilate(gray, kernel, iterations=2)
-                gray = gray[110:165, 110:231]
+                gray = gray[self.gv.y1:self.gv.y2, self.gv.x1:self.gv.x2]
 
                 height, width = gray.shape
 
@@ -116,23 +98,18 @@ class Img:
                 left_coordinate = [None if len(left) == 0 else left[len(left) // 2], 0]
                 right_coordinate = [None if len(right) == 0 else right[len(right) // 2], width-1]
 
-                cv2.imshow('gv', gray)
-                cv2.imshow('threshold', gray)
-
-                k = cv2.waitKey(1)
-                # esc 키 종료
-                if k == 27:
-                    break
                 try:
                     self.st.stage(top_coordinate, bottom_coordinate, left_coordinate, right_coordinate, w_c, h_c)
                 except:
                     input()
+                    
                 if self.gv.task_step != 1:
                     break
             else:
                 print("error")
                 break
 
+    # 이미지 행, 열별로 픽셀값 구하기
     def sum_pixel(self, img, max_flag=False):
         a0 = np.sum(img, axis=0)    # 가로
         a1 = np.sum(img, axis=1)    # 세로
@@ -147,7 +124,8 @@ class Img:
         a1 = None if len(a1) == 0 else a1[len(a1) // 2]
 
         return a0, a1
-    
+
+    '''3단계(라인복귀)에서만 쓰이는 함수들'''
     # 라인 이미지만 남기기
     def getline_img(self, left_line, right_line, img):
         line_img = np.copy(img)
@@ -159,14 +137,11 @@ class Img:
 
         return line_img
 
-
     # 허프라인을 이용하여 교차점 찾기 위한 함수
     def hough_line(self, img):
         gause_img = cv2.GaussianBlur(img, (5, 5), 0)
         median_img = cv2.medianBlur(gause_img, 5)
-        canny = cv2.Canny(median_img, 5000, 1500, apertureSize = 5, L2gradient = True)
-        cv2.imshow('canny', canny)
-        '''확률적 허프라인'''
+        canny = cv2.Canny(median_img, 5000, 1500, apertureSize=5, L2gradient=True)
         lines = cv2.HoughLinesP(canny, 0.8, np.pi / 180, 20, minLineLength=10, maxLineGap=100)
 
         if lines is not None:
@@ -177,10 +152,9 @@ class Img:
                 # 기울기 계산
                 dy = (i[0][3] - i[0][1])
                 dx = (i[0][2] - i[0][0])
+                angle = 90
                 if dx != 0:
                     angle = math.atan(dy / dx) * (180.0 / math.pi)
-                else:
-                    angle = 90
 
                 if angle < 0:
                     angle += 180
@@ -258,11 +232,9 @@ class Img:
                 left_line, right_line = self.r_l_line(line1_list, line2_list)
                 return int(cx_list), int(cy_list), left_line, right_line
 
-            else:
-                return None, None, None, None
-
         return None, None, None, None
 
+    '''hough_line함수 내에서만 쓰이는 함수들'''
     # 왼쪽선 오른쪽선 구분
     def r_l_line(self, l1, l2):
         l1_c = (l1[0][0] + l1[0][2])//2
@@ -281,10 +253,10 @@ class Img:
         # 기울기 계산
         dy = (y - cy)
         dx = (x - cx)
+        angle = 90
         if dx != 0:
             angle = math.atan(dy / dx) * (180.0 / math.pi)
-        else:
-            angle = 90
+
         if angle < 0:
             angle += 180
         if cy < y:

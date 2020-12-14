@@ -10,7 +10,6 @@ from global_var import Global_var
 from Serial import Message
 from img_process import Img
 from Stage_decision import Stage
-from Action_decision import Action
 
 if __name__ == '__main__':
     # cap = None
@@ -65,8 +64,8 @@ if __name__ == '__main__':
         # video_load()
         if gv.task_step == 1:
             while True:
-                mg.TX_append(gv.up_head)
-                if mg.get_up():
+                mg.TX_append(gv.down_head)
+                if mg.get_down():
                     time.sleep(0.5)
                     break
             lp.img_process()
@@ -80,17 +79,6 @@ if __name__ == '__main__':
                 gv.task_step = 2
                 i = 1
             # st.p_ = 3
-        elif gv.task_step == 3:
-            zz = 0
-            while True:
-                mg.TX_append(gv.head_stage)
-                print("날이 아닌가..", zz)
-                if mg.get_sdown():
-                    zz += 1
-                    print('{} 단계 숙이기  완료'.format(zz))
-                if mg.get_sdown_com():
-                    zz = 0
-                    print("전체 숙이기 완료")
         # elif gv.task_step == 2:
         #     gv.task_step = int(input("현재 테스크 2, 다음 테스크 입력바람"))
         # elif gv.task_step == 3:
