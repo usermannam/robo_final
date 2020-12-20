@@ -21,7 +21,7 @@ class Global_var:
         self.delay_num = 0
 
         # 3. 라인 탐색 --> 상황 단계에 따라서
-        self.step = 4
+        self.step = 3
 
         # 제어 신호들 --- v2
         self.Forward = 33       # 앞으로 이동

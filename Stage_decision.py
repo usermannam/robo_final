@@ -116,34 +116,36 @@ class Stage:
         
         # 나갈때
         elif self.gv.step == 4:
-            if self.gv.L_R_flag and left[0] is not None and top[1] is not None:
-                if left[0] >= self.gv.v_c and w_ < self.gv.h_c:
-                    print("111111")
-                    if self.deflag:
-                        print("앞으로")
-                    else:
-                        self.forward()
-                    self.c = True
+            if not self.c and not self.c2:
+                if self.gv.L_R_flag and left[0] is not None and top[1] is not None:
+                    if left[0] >= self.gv.v_c:
+                        print("111111")
+                        if self.deflag:
+                            print("앞으로")
+                        else:
+                            self.forward()
+                        self.c = True
 
-            elif not self.gv.L_R_flag and right[0] is not None and top[1] is not None:
-                if right[0] >= self.gv.v_c and w_ > self.gv.h_c:
-                    print("111111")
-                    if self.deflag:
-                        print("앞으로")
-                    else:
-                        self.forward()
-                    self.c = True
+                elif not self.gv.L_R_flag and right[0] is not None and top[1] is not None:
+                    if right[0] >= self.gv.v_c:
+                        print("111111")
+                        if self.deflag:
+                            print("앞으로")
+                        else:
+                            self.forward()
+                        self.c = True
 
-            # 여기서 회전을 주고 None이 아니면 위의 턴(self.gv.step == 2)로 가서 턴 돌다가 다 돌았다는 신호오면
-            # 고개들어서 앞의 글자 확인하고 다시 와서 고개 숙이고 앞으로 직진하다가 앞의 직선 사라지면 거기에서 문 열기위한 동작으로 이동
-            # 위의 글을 바로 밑의 코드에 적용해야함..
-            if self.c and left[0] is None and right[0] is None:
-                if self.gv.L_R_flag and left[0] >= self.gv.v_c:
+            elif self.c:
+                if self.gv.L_R_flag:
                     self.left_turn()
-                    self.c2 = True
-                elif not self.gv.L_R_flag and right[0] >= self.gv.v_c:
+                    if not (bottom[1] is not None and right[0] is None):
+                        self.c = False
+                        self.c2 = True
+                elif not self.gv.L_R_flag:
                     self.right_turn()
-                    self.c2 = True
+                    if not (bottom[1] is not None and left[0] is None):
+                        self.c = False
+                        self.c2 = True
 
             elif self.c2:
                 print("444444")
@@ -158,7 +160,7 @@ class Stage:
                         self.c2 = False
                         t_flag = False
                         print("일단 완료")
-                        time.sleep(30)
+                        self.c = False
 
                 elif w_ is not None and h_ is not None:
                     if self.gv.v_c - self.gv.e_v <= h_ and h_ <= self.gv.v_c + self.gv.e_v:
@@ -166,7 +168,7 @@ class Stage:
                             self.c2 = False
                             t_flag = False
                             print("일단 완료 1111")
-                            time.sleep(30)
+                            self.c = False
 
                 if t_flag:
                     if self.gv.L_R_flag:

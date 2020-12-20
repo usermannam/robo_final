@@ -64,8 +64,8 @@ if __name__ == '__main__':
         # video_load()
         if gv.task_step == 1:
             while True:
-                mg.TX_append(gv.down_head)
-                if mg.get_down():
+                mg.TX_append(gv.up_head)
+                if mg.get_up():
                     time.sleep(0.5)
                     break
             lp.img_process()
