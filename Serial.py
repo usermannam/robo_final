@@ -100,6 +100,14 @@ class Message:
             self.gv.RX.remove(data)
             self.gv.RX.append(data)
 
+    # 적외선 센서 값 도달 여부
+    def get_sensor(self):
+        self.release()
+        if 50 in self.gv.RX:
+            self.gv.RX.remove(50)
+            return True
+        return False
+
     # 머리 올린 신호 왔는지 체크
     def get_up(self):
         self.release()

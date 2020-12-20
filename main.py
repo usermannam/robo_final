@@ -45,7 +45,7 @@ if __name__ == '__main__':
     gv = Global_var()
     mg = Message(gv)
     st = Stage(gv, mg)
-    lp = Img(gv, st, cap)
+    lp = Img(gv, st, mg, cap)
     # at = Action(gv)
 
     # lp.var_init(sd)
@@ -61,28 +61,50 @@ if __name__ == '__main__':
     time.sleep(1)
     i = 0
     while True:
-        # video_load()
         if gv.task_step == 1:
             while True:
-                mg.TX_append(gv.up_head)
-                if mg.get_up():
-                    time.sleep(0.5)
-                    break
+                if gv.step != 3:    # 라인 복귀가 아니라면 머리 박기
+                    mg.TX_append(gv.down_head)
+                    if mg.get_down():
+                        time.sleep(0.5)
+                        break
+                else:               # 라인 복귀라면 머리 들기
+                    mg.TX_append(gv.up_head)
+                    if mg.get_up():
+                        time.sleep(0.5)
+                        break
+                        
             lp.img_process()
 
         elif gv.task_step == 2:
+            while True:
+                mg.TX_append(gv.up_head)
+                if mg.get_up():
+                    break
+            ''' 화면 인식, 
+            화면 인식 후에 어떤 작업해야하는지 상황에 따라 task_step값 변경 필요
+             예를 들어 동서남북 인식후에는 문 통과
+             ABCD 인식후에는 물체탐지작업 필요'''
+            
+            ''' 또한 이동 step 결정 필요..
+            화살표 다음에는 step = 2
+            ABCD 다름에는 step = 3'''
             i += 1
-            print("화면 인식")
+            print("화면 인식 시작")
             time.sleep(0.5)
-            gv.task_step = 1
-            if i == 2:
-                gv.task_step = 2
-                i = 1
-            # st.p_ = 3
-        # elif gv.task_step == 2:
-        #     gv.task_step = int(input("현재 테스크 2, 다음 테스크 입력바람"))
-        # elif gv.task_step == 3:
-        #     gv.task_step = int(input("현재 테스크 3, 다음 테스크 입력바람"))
-        # else:
-        #     gv.task_step = int(input("테스크 잘 못 입력, 다음 테스크 입력바람 (1,2,3)"))
+            print("화면 인식 끝")
+            
+        elif gv.task_step == 3:
+            '''물체탐지 및 물체 옮기기'''
+            '''끝나고 task_step = 1로 변경 step = 3으로 변경'''
+            pass
 
+        elif gv.task_step == 4:
+            '''문 통과 모션'''
+            '''끝나고 task_step = 1로 변경 step = 1로 변경'''
+            pass
+
+        # 나가기 플래그 True이면 step == 4로 변경
+        if gv.exit_flag:
+            gv.step = 4
+            gv.door_flag = True

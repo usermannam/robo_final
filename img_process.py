@@ -3,9 +3,10 @@ import cv2
 import math
 
 class Img:
-    def __init__(self, gv, stage, cap):
+    def __init__(self, gv, stage, message, cap):
         self.gv = gv
         self.st = stage
+        self.mg = message
         self.cap = cap
         self.size_x = self.gv.size_x
         self.size_y = self.gv.size_y
@@ -78,6 +79,16 @@ class Img:
                         if a0 is not None:
                             self.st.return_line2(a0, gray)
                     continue
+                
+                # 문 통과 여부
+                if self.gv.door_flag:
+                    # 적외선 센서 값 들어옴
+                    if self.mg.get_sensor():
+                        self.gv.task_step = 2
+                        break
+                else:
+                    if self.mg.get_sensor():
+                        pass
 
                 kernel = np.ones((3, 3), np.int8)
                 gray = cv2.erode(gray, kernel, iterations=2)

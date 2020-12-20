@@ -7,7 +7,6 @@ class Stage:
         self.mg = message
         self.c = False
         self.c2 = False
-        self.deflag = False
         self.re_b = (self.gv.size_x - self.gv.y2) / (self.gv.y2 - self.gv.y1)
 
     # 교차점 매트릭스, 화면 채우는 선 포인트(시작, 끝) 리스트, 원래 선 포인트(시작, 끝) 리스트, 선 기울기 리스트, 선 절편 리스트
@@ -17,24 +16,17 @@ class Stage:
             # 끝에 다다르면
             if top[1] is None and h_ is not None:
                 if h_ > self.gv.v_c:
-                    if self.deflag:
-                        print("앞으로")
-                    else:
-                        self.forward()
-
+                    self.forward()
                     self.c = True
 
             elif self.c and top[1] is None and bottom[1] is None and left[0] is None and right[0] is None:
-                if self.deflag:
-                    print("22222")
-                else:
-                    while True:
-                        self.up_head()
-                        if self.mg.get_up():
-                            break
-                    self.c = False
-                    self.gv.task_step = 2
-                    self.gv.step = 2
+                self.c = False
+                self.gv.task_step = 2
+
+                if self.gv.exit_flag:
+                    print("mission_complete!!")
+
+                # self.gv.step = 2 --> 2 또는 3은 화면인식 부분에서 결정해야 할듯
 
             else:
                 if top[1] is not None and bottom[1] is not None:
@@ -73,20 +65,12 @@ class Stage:
                             self.right_turn()
 
                 elif w_ - self.gv.e_ <= self.gv.h_c and self.gv.h_c <= w_ + self.gv.e_:
-                    if self.deflag:
-                        print('그래프 앞으로')
-                    else:
-                        self.forward()
+                    self.forward()
+
                 elif w_ <= self.gv.h_c:
-                    if self.deflag:
-                        print('그래프 왼쪽')
-                    else:
-                        self.left_turn()
+                    self.left_turn()
                 else:
-                    if self.deflag:
-                        print('그래프 오른쪽')
-                    else:
-                        self.right_turn()
+                    self.right_turn()
 
         # 턴 --> 맨 처음과 나갈 때
         elif self.gv.step == 2:
@@ -109,30 +93,20 @@ class Stage:
             if t_flag:
                 if self.gv.L_R_flag:
                     self.left_turn()
-                    pass
                 else:
                     self.right_turn()
-                    pass
         
         # 나갈때
         elif self.gv.step == 4:
             if not self.c and not self.c2:
                 if self.gv.L_R_flag and left[0] is not None and top[1] is not None:
                     if left[0] >= self.gv.v_c:
-                        print("111111")
-                        if self.deflag:
-                            print("앞으로")
-                        else:
-                            self.forward()
+                        self.forward()
                         self.c = True
 
                 elif not self.gv.L_R_flag and right[0] is not None and top[1] is not None:
                     if right[0] >= self.gv.v_c:
-                        print("111111")
-                        if self.deflag:
-                            print("앞으로")
-                        else:
-                            self.forward()
+                        self.forward()
                         self.c = True
 
             elif self.c:
@@ -148,7 +122,6 @@ class Stage:
                         self.c2 = True
 
             elif self.c2:
-                print("444444")
                 self.c = False
                 t_flag = True
                 if bottom[1] is not None and top[1] is not None:
@@ -159,7 +132,6 @@ class Stage:
                     if b - self.gv.e_ <= self.gv.h_c and self.gv.h_c <= t + self.gv.e_:
                         self.c2 = False
                         t_flag = False
-                        print("일단 완료")
                         self.c = False
 
                 elif w_ is not None and h_ is not None:
@@ -167,7 +139,6 @@ class Stage:
                         if w_ - self.gv.e_ <= self.gv.h_c and self.gv.h_c <= w_ + self.gv.e_:
                             self.c2 = False
                             t_flag = False
-                            print("일단 완료 1111")
                             self.c = False
 
                 if t_flag:
@@ -177,7 +148,6 @@ class Stage:
                         self.right_turn()
 
             if not self.c and not self.c2:
-                print("33333")
                 if top[1] is not None and bottom[1] is not None:
                     bottom[1] = bottom[1] - ((top[1] - bottom[1]) * self.re_b)
                     if bottom[1] - self.gv.e_ <= self.gv.h_c and self.gv.h_c <= bottom[1] + self.gv.e_:
@@ -214,40 +184,22 @@ class Stage:
                             self.right_turn()
 
                 elif w_ - self.gv.e_ <= self.gv.h_c and self.gv.h_c <= w_ + self.gv.e_:
-                    if self.deflag:
-                        print('그래프 앞으로')
-                    else:
-                        self.forward()
+                    self.forward()
                 elif w_ <= self.gv.h_c:
-                    if self.deflag:
-                        print('그래프 왼쪽')
-                    else:
-                        self.left_turn()
+                    self.left_turn()
                 else:
-                    if self.deflag:
-                        print('그래프 오른쪽')
-                    else:
-                        self.right_turn()
+                    self.right_turn()
 
     # 라인 복귀 함수 (중간 부분쯤에서 직선 따라가기)
     def return_line2(self, a0, img):
         h, w = img.shape
         w = w//2
         if a0 - self.gv.e_ <= w and w <= a0 + self.gv.e_:
-            if self.deflag:
-                print('그래프 앞으로')
-            else:
-                self.forward()
+            self.forward()
         elif a0 <= w:
-            if self.deflag:
-                print('그래프 왼쪽')
-            else:
-                self.left_turn()
+            self.left_turn()
         else:
-            if self.deflag:
-                print('그래프 오른쪽')
-            else:
-                self.right_turn()
+            self.right_turn()
 
     # 라인 복귀 함수
     def return_line(self, cx, cy, h, w, head_check=False):
@@ -307,11 +259,9 @@ class Stage:
         self.mg.TX_append(self.gv.Right_turn)
 
     def left_turn(self):
-        self.p_ = 1
         self.mg.TX_append(self.gv.Left_onturn)
 
     def right_turn(self):
-        self.p_ = 2
         self.mg.TX_append(self.gv.Right_onturn)
 
     def up_head(self):

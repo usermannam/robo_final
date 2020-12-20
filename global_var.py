@@ -2,9 +2,11 @@ import serial
 
 class Global_var:
     def __init__(self):
-        self.task_step = 1      # 현재 수행해야 하는 연산
+        self.task_step = 2      # 현재 수행해야 하는 연산
         self.L_R_flag = False   # 왼쪽방향 오른쪽방향 (True: 왼쪽, False: 오른쪽)
         self.exit_flag = True       # 다음에는 나간다는 플래그
+        self.door_flag = False      # 문 통과작업 여부(True: 문 통과해야함, False: 문 통과 필요X)
+        self.m_count = 0            # 지역 몇 개 통과했는지 --> 3개가 되면 나가기 플래그(exit_flag) True 해야함
 
         self.serial_use = 1
         self.BPS = 4800  # 4800,9600,14400, 19200,28800, 57600, 115200
@@ -21,7 +23,7 @@ class Global_var:
         self.delay_num = 0
 
         # 3. 라인 탐색 --> 상황 단계에 따라서
-        self.step = 3
+        self.step = 1
 
         # 제어 신호들 --- v2
         self.Forward = 33       # 앞으로 이동
